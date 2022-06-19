@@ -1,0 +1,28 @@
+{
+	"FileVersion": 3,
+	"Version": 2,
+	"VersionName": "2.0.3",
+	"FriendlyName": "DataWise 2",
+	"Description": "Capture any interesting piece of information and turn it into a fancy graph or visualize it in the editor.",
+	"Category": "Analytics",
+	"CreatedBy": "Sander Brouwers",
+	"CreatedByURL": "http://sanderbrouwers.info",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "DataWise",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "DataWiseEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}

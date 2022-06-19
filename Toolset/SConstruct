@@ -1,0 +1,108 @@
+import os, sys, glob
+from Project import CreateSolution
+
+AddOption('--module',
+                  dest='module',
+				  default='',
+                  type='string',
+                  nargs=1)
+
+AddOption('--target',
+                  dest='target',
+				  default='windows',
+                  type='string',
+                  nargs=1)
+
+AddOption('--cpu',
+                  dest='cpu',
+				  default='x86',
+                  type='string',
+                  nargs=1)
+				  
+AddOption('--runtime',
+                  dest='runtime',
+				  default='debug',
+                  type='string',
+                  nargs=1)
+			
+if(GetOption('module') == ""):
+	print("No module specified")
+	sys.exit(-1)
+
+solution = CreateSolution()
+target_project = None
+target_config = None
+
+for project in solution.Projects:
+	if project.Name.lower() == GetOption('module'):
+		target_project = project
+
+if target_project == None:
+	print("No project defined for module: " + GetOption('module'))
+	sys.exit(0)
+	
+config_name = GetOption("target").lower() + "_" + GetOption("cpu").lower() + "_" + GetOption("runtime").lower()
+	
+for config in target_project.TargetConfigs:
+	if (config.Name + "_" + config.Type).lower() == config_name:
+		target_config = config
+			
+if target_config == None:
+	print("No suitable configuration: " + config_name)
+	sys.exit(0)
+
+source_files = []
+header_files = []
+preprocessor_defines = []
+libs = []
+lib_dirs = []
+env={}
+variant = "executable"
+
+OutDir = "bin\\" + GetOption("target").lower() + "_" + GetOption("cpu").lower() + "_" + GetOption("runtime").lower()
+BinDir = "obj\\" + GetOption('module').lower() + "\\" + GetOption("target").lower() + "_" + GetOption("cpu").lower() + "_" + GetOption("runtime").lower()
+OutFile = OutDir + "\\" + GetOption("module")
+
+for directory in target_project.SourcePathes:
+	source_files += glob.glob(directory + '/**/*.cpp', recursive = True)
+	source_files += glob.glob(directory + '/**/*.c', recursive = True)
+	
+for directory in target_project.IncludePathes:
+	header_files += glob.glob(directory + '/**/*.h', recursive = True)
+	
+preprocessor_defines = target_config.Defines
+variant = target_project.ExportType.lower()
+libs = target_config.Libs
+	
+temp_source_files = source_files
+source_files = []
+
+for f in temp_source_files:
+	source_files.append(BinDir + "\\" + f)
+
+if(GetOption("target").lower() == "windows"):
+	if(GetOption("cpu").lower() == "x86"):
+		env = Environment()
+		
+	if(GetOption("cpu").lower() == "x64"):
+		env = Environment(TARGET_ARCH = 'x86_64')
+		
+	env.Append(CXXFLAGS = ['/EHsc'])
+		
+env.Decider('timestamp-newer')
+env.VariantDir(BinDir, ".", duplicate=0)
+
+env.AppendUnique(CPPDEFINES = preprocessor_defines)
+env['PDB']='${TARGET.base}.pdb'
+
+if(GetOption("runtime").lower() == "debug"):
+	env.Append(CXXFLAGS = ['/DEBUG'])
+	env.Append(CXXFLAGS = ['/Od'])
+else:
+	env.Append(CXXFLAGS = ['/O2'])
+		
+if(variant == "executable"):
+	env.Program(OutFile, source_files, LIBS = [ libs ])
+	
+if(variant == "library"):
+	env.SharedLibrary(OutFile, source_files, LIBS = [ libs ])
