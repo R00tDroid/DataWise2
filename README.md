@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/r00tdroid/datawise2/badge)](https://www.codefactor.io/repository/github/r00tdroid/datawise2)
+
 # DataWise2
 DataWise 2 is a software package that provides analytics tool for your projects. It has native integration for Unity and Unreal Engine 4.
 
